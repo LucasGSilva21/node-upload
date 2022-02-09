@@ -1,5 +1,8 @@
 let bytesAmount = 0
 
+const API_URL = "http://localhost:3000"
+const ON_UPLOAD_EVENT = "file-uploaded"
+
 const formatBytes = (bytes, decimals = 2) => {
   if(bytes === 0) return '0 Bytes'
 
@@ -39,7 +42,19 @@ const showSize = () => {
 }
 
 const onLoad = () => {
-  console.log('loaded!')
+  const ioClient = io.connect(API_URL, { withCredentials: false })
+
+  ioClient.on("connect", (msg) => {
+    console.log('connected!', ioClient.id)
+  })
+
+  ioClient.on(ON_UPLOAD_EVENT, (bytesReceived) => {
+    console.log('received', bytesReceived)
+    bytesAmount = bytesAmount - bytesReceived
+    updateStatus(bytesAmount)
+  })
+
+  updateStatus(0)
 }
 
 window.onload = onLoad
